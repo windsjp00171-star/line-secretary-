@@ -1,0 +1,37 @@
+{
+  "functions": {
+    "api/webhook.js": {
+      "maxDuration": 60
+    },
+    "api/setup/status.js": {
+      "includeFiles": "supabase/schema.sql"
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/morning",
+      "schedule": "0 23 * * *"
+    },
+    {
+      "path": "/api/cron/weekly",
+      "schedule": "0 0 * * 5"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*).html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/calendar.ics",
+      "destination": "/api/calendar"
+    }
+  ]
+}
