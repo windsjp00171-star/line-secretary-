@@ -1,0 +1,45 @@
+# 自動接收原作者的更新（每週一次）
+#
+# 預設不會跑：GitHub 對 fork／複製出來的 repo 預設關閉 Actions。
+# 想自動更新：到你 repo 的 Actions 分頁 → 按「I understand my workflows, go ahead and enable them」。
+# 合併成功後推回你的 main，Vercel 會自動重新部署。
+# 合併失敗（你改過的地方跟原作者衝突）時這個工作會失敗，GitHub 會寄信通知你，
+# 你的程式不會被動到；那次請改用 Sync fork 按鈕或手動合併。
+name: 同步原作者更新
+
+on:
+  schedule:
+    - cron: '0 18 * * 0' # 每週一凌晨 2 點（台灣時間）
+  workflow_dispatch: # Actions 分頁也可以手動按「Run workflow」立刻同步
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    # 原作者自己的 repo 不需要跑
+    if: github.repository != 'windsjp00171-star/line-secretary-'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 合併原作者的 main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://github.com/windsjp00171-star/line-secretary-.git
+          git fetch upstream main
+          if git merge-base --is-ancestor upstream/main HEAD; then
+            echo "已經是最新版本"
+            exit 0
+          fi
+          if git merge-base HEAD upstream/main > /dev/null; then
+            git merge upstream/main --no-edit
+          else
+            # 用 Vercel 部署按鈕建立的 repo 跟原作者沒有共同歷史；
+            # 第一次同步時以原作者的版本為準接上，之後就能正常合併
+            git merge upstream/main --no-edit --allow-unrelated-histories -X theirs
+          fi
+          git push origin HEAD:${{ github.event.repository.default_branch }}

@@ -14,7 +14,7 @@
 2. [建立 LINE 官方帳號（小秘書的本體）](#2-建立-line-官方帳號小秘書的本體)
 3. [建立 Supabase 資料庫（小秘書的記憶）](#3-建立-supabase-資料庫小秘書的記憶)
 4. [申請 Gemini API key（小秘書的大腦）](#4-申請-gemini-api-key小秘書的大腦)
-5. [一鍵部署到 Vercel](#5-一鍵部署到-vercel)
+5. [部署到 Vercel](#5-部署到-vercel)
 6. [打開設定精靈，把每一項變綠色](#6-打開設定精靈把每一項變綠色)
 7. [設定主人（只有你能用）](#7-設定主人只有你能用)
 8. [讓提醒準時跳出來（cron-job.org）](#8-讓提醒準時跳出來cron-joborg)
@@ -137,22 +137,37 @@ Vercel、Supabase、cron-job.org 都可以直接用 GitHub 帳號登入，不用
 
 ---
 
-## 5. 一鍵部署到 Vercel
+## 5. 部署到 Vercel
 
-按下面的按鈕：
+有兩種方式，**建議用 A**：之後原作者推出新功能，你按一下就能更新。
+
+| | A. Fork（建議） | B. 一鍵部署按鈕 |
+|---|---|---|
+| 難度 | 多 2 個步驟 | 最快 |
+| 之後接收更新 | 按 **Sync fork** 就好 | 要另外開啟自動同步（見第 10 節） |
+| 你的程式碼 | 公開（金鑰不在程式碼裡，放心） | 可以設成私有 |
+
+### A. Fork（建議）
+
+1. 在本頁右上角按 **Fork** → **Create fork**，你的 GitHub 就會有一份自己的副本。
+2. 打開 [Vercel](https://vercel.com/new)，用 GitHub 登入，在 **Import Git Repository** 找到剛剛 fork 的 repo，按 **Import**。
+3. 展開 **Environment Variables**，把記事本裡的 6 組金鑰一個一個加進去（Key 填左邊的名稱，Value 貼上值）。
+4. 按 **Deploy**，等 1 分鐘左右看到煙火 🎉 就完成了。
+5. 按 **Continue to Dashboard**，上方 **Domains** 那串網址（例如 `https://line-secretary-xxxx.vercel.app`）就是你的小秘書網址。
+
+<!-- 截圖：GitHub Fork 按鈕 → docs/images/github-01-fork.png -->
+<!-- 截圖：Vercel Import 並填環境變數 → docs/images/vercel-01-env.png -->
+<!-- 截圖：部署成功畫面 → docs/images/vercel-02-done.png -->
+
+### B. 一鍵部署按鈕
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwindsjp00171-star%2Fline-secretary-&project-name=line-secretary&repository-name=line-secretary&env=LINE_CHANNEL_SECRET,LINE_CHANNEL_ACCESS_TOKEN,SUPABASE_URL,SUPABASE_SERVICE_KEY,GEMINI_API_KEY,DASHBOARD_TOKEN&envDescription=%E6%AF%8F%E4%B8%80%E6%8A%8A%E9%87%91%E9%91%B0%E5%8E%BB%E5%93%AA%E8%A3%A1%E6%8B%BF%EF%BC%8C%E8%A6%8B%20README%20%E7%AC%AC%202%E2%80%934%20%E6%AD%A5&envLink=https%3A%2F%2Fgithub.com%2Fwindsjp00171-star%2Fline-secretary-%23readme)
 
 1. 用 GitHub 登入 Vercel。
-2. **Create Git Repository**：Vercel 會在你的 GitHub 建一份自己的副本（就是 fork），名稱可以改，建議勾選 **Private**。
+2. **Create Git Repository**：Vercel 會在你的 GitHub 複製一份程式碼（名稱可以改，可以勾選 **Private**）。這份複本和原作者沒有連結，想接收更新請見第 10 節的「自動同步」。
 3. **Configure Project**：畫面會列出 6 個環境變數，把記事本裡的值一個一個貼上。
-4. 按 **Deploy**，等 1 分鐘左右看到煙火 🎉 就完成了。
-5. 按 **Continue to Dashboard**，上方 **Domains** 那串網址（例如 `https://line-secretary-xxxx.vercel.app`）就是你的小秘書網址。
-
-<!-- 截圖：Vercel 填環境變數畫面 → docs/images/vercel-01-env.png -->
-<!-- 截圖：部署成功畫面 → docs/images/vercel-02-done.png -->
-
-> 不想用按鈕也可以：在 GitHub 按右上角 **Fork**，再到 Vercel 按 **Add New → Project** 匯入你 fork 的 repo，環境變數一樣照上面填。
+4. 按 **Deploy**，等 1 分鐘左右看到煙火 🎉。
+5. 按 **Continue to Dashboard**，上方 **Domains** 那串網址就是你的小秘書網址。
 
 ---
 
@@ -261,7 +276,10 @@ LINE Official Account Manager → 回應設定 → 關閉「自動回應訊息�
 Gemini 每天有免費額度，用完後隔天自動恢復。這段期間用「待辦 內容」「提醒 內容」這類指令開頭，不需要 AI 也能記錄。
 
 **原作者更新了功能，我要怎麼跟上？**
-到你 GitHub 上的那份 repo，按 **Sync fork** → **Update branch**，Vercel 會自動重新部署。如果你是用部署按鈕建立的（不是 fork），就沒有 Sync fork 按鈕，需要手動合併。
+- **用 Fork 建立的**：到你 GitHub 上的那份 repo，按 **Sync fork** → **Update branch**，Vercel 會自動重新部署。
+- **想完全自動**（Fork 或部署按鈕都適用）：到你 repo 的 **Actions** 分頁 → 按 **I understand my workflows, go ahead and enable them**。之後每週一凌晨會自動合併原作者的更新；想馬上更新，可以在 Actions 分頁點「同步原作者更新」→ **Run workflow**。
+- 如果你自己改過程式，而且剛好跟原作者改到同一個地方，自動同步會失敗、GitHub 會寄信通知你，你的程式不會被動到。
+- 更新說明裡如果寫「需要更新資料表」，請再到 Supabase SQL Editor 執行一次最新的 [`supabase/schema.sql`](supabase/schema.sql)（重複執行不會影響已有的資料）。
 
 **我可以改名字、改頭像嗎？**
 可以，到 LINE Official Account Manager → 設定 → 帳號設定。
