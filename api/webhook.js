@@ -1,8 +1,9 @@
 const crypto = require('crypto');
 const { dispatch, handlePostback, handleImageEvents, handleStoredImage } = require('../lib/commands');
-const { replyMessage, pushMessage, getImageBase64 } = require('../lib/line');
+const { replyMessage, pushMessage, getImageBase64, withQuickReply } = require('../lib/line');
 const { importSchedulePdf } = require('../lib/worship');
 const { extractEventFromImage } = require('../lib/vision');
+const { transcribeAudio, withHeard, MAX_SECONDS } = require('../lib/voice');
 const { uploadImage } = require('../lib/storage');
 const { isStoreImageMode, setState } = require('../lib/botstate');
 
@@ -81,7 +82,23 @@ const handler = async function (req, res) {
         // 文字訊息
         if (event.message.type === 'text') {
           const reply = await dispatch(event.message.text);
-          await replyMessage(replyToken, reply);
+          await replyMessage(replyToken, withQuickReply(reply));
+          return;
+        }
+
+        // 語音訊息：轉成文字後照打字處理，回覆最上面附「聽到：…」方便核對
+        if (event.message.type === 'audio') {
+          if ((event.message.duration || 0) > MAX_SECONDS * 1000) {
+            await replyMessage(replyToken, `🎤 語音太長了，${MAX_SECONDS / 60} 分鐘以內比較聽得準，分段說或直接打字吧。`);
+            return;
+          }
+          const { base64, contentType } = await getImageBase64(event.message.id);
+          const heard = await transcribeAudio(base64, contentType);
+          if (heard.error) {
+            await replyMessage(replyToken, heard.error);
+            return;
+          }
+          await replyMessage(replyToken, withQuickReply(withHeard(heard.text, await dispatch(heard.text))));
           return;
         }
 
